@@ -62,7 +62,11 @@ def highlight_search_term(text, term):
 
 with tabs[0]:
 
-    st.markdown("For AND statements, use the different boxes. For OR statements, use a '|' between terms. ")
+    st.markdown("This tool allows you to search for text in articles from date X to date Y, using a variety of sources. Most article texts are included, but opinion pieces, editorials, and interactive content (such as maps and videos) are not. Live articles are accessible, providing up-to-date information.")
+    
+    st.markdown("Currently, there are X articles with extracted bodies and Y articles with only headlines available. You can search for terms or phrases that appear in the same paragraph. While you can export an unlimited number of paragraphs from your search results, you cannot read or export entire articles. To access full articles, follow the links provided next to the paragraphs of interest.")
+    
+    st.markdown('To search, use the form below. For terms appearing together in the same paragraph, enter each word in its own box (e.g., "cat" AND "dog"). To find paragraphs containing either term, use the "|" symbol between each word or phrase. Note that searching for "cat" will also return variations like "cats," "catelogue," and "caterpillar," so please be specific in your queries. ')
    
 
     with st.form(key='my_form'):
@@ -97,7 +101,7 @@ with tabs[0]:
         # Check if any options are selected
         if selected_sources:
             # Filter the DataFrame based on selected options
-            filtered_df = df[df['Source'].isin(selected_sources)]
+            filtered_df = filtered_df[filtered_df['Source'].isin(selected_sources)]
 
 
             #if not empty search terms
@@ -121,34 +125,70 @@ with tabs[0]:
                 filtered_df = filtered_df.drop_duplicates(subset='body')
 
                 st.write("Searching for the following term(s) in the same paragraph:")
-                st.write("  Query 1:", term1)
+                st.write("  Query:", term1)
                 if term2 !="":
-                    st.write("  Query 2:", term2)
+                    st.write(" + ", term2)
                 if term3 !="":
-                    st.write("  Query 3:", term3)
+                    st.write(" + ", term3)
 
-                st.markdown("---")  # This creates a horizontal line
+                st.markdown("---") 
 
 
                 filtered_df['Highlighted'] = filtered_df['body'].apply(lambda x: highlight_search_term(x, word_filter))
                 filtered_df = filtered_df[["Source","Date","Highlighted","Link","ArticleID","body","date"]]
                 
-                
+ ##-----------------fig count of all term usage 
+               
                 # Group by the 'Category' column and sum the values
                 #grouped_data = filtered_df.groupby('Source')["body"].count().reset_index()
                 source_counts = filtered_df['Source'].value_counts().reset_index()
                 source_counts.columns = ['Source', 'Count']
                
-                fig = px.bar(source_counts, x='Source', y='Count', 
+                fig = px.bar(source_counts, x='Count', y='Source', orientation='h',
                     title='Count of relevant paragraphs by source',
-                    labels={'Count': 'Occurrences', 'Category': 'Category'},color="Source")
-               
-                fig.update_layout(
-                    width=400, 
-                )
+                    labels={'Count': 'Occurrences', 'Category': 'Category'},color="Source",text='Count')
 
+
+                fig.update_layout(
+                                    width=400, 
+                                )
 
                 st.plotly_chart(fig)
+
+##----------------- fig articles with keyword 
+                
+                # pattern = "|".join(filtered_df["ArticleID"])
+                # headlines = ref[ref["ArticleID"].str.contains(pattern)]
+
+
+                # source_counts_ = headlines['Source'].value_counts().reset_index()
+                # source_counts_.columns = ['Source', 'Count']
+
+                # fig_ = px.bar(source_counts_, x='Count', y='Source', orientation='h',
+                #     title='Count of headlines containing term by source (along with all articles surveyed)',
+                #     labels={'Count': 'Occurrences', 'Category': 'Category'},color="Source",text='Count')
+                
+                # fig_.update_layout(
+                #                     width=400, 
+                #                 )
+
+               
+
+
+                # source_counts__ = df.groupby('Source')["ArticleID"].nunique().reset_index()
+                # source_counts__.columns = ['Source', 'Count']
+
+                # fig_.add_bar(x=source_counts__['Count'], 
+                #             y=source_counts__['Source'], 
+                #             name='Total Values', 
+                #             orientation='h', 
+                #             marker_color='lightblue', 
+                #             opacity=0.5)
+                
+                # fig_.update_layout(barmode='overlay')
+
+                # st.plotly_chart(fig_)  
+                
 
                 
                 st.write(len(filtered_df)," Paragraphs containing terms(s)")
@@ -159,28 +199,48 @@ with tabs[0]:
                 st.dataframe(filtered_df.head(100))
                 
                 
-                csv = filtered_df.to_csv(index=False)  # Convert DataFrame to CSV format
+                csv = filtered_df.to_csv(index=False)  
                 st.download_button(
                     label="Export DataFrame as CSV",
                     data=csv,
                     file_name='news_data.csv',
                     mime='text/csv')
 
-                st.markdown("---")  # This creates a horizontal line
+                st.markdown("---") 
                 grouped_df = filtered_df.groupby(['Source', 'date']).size().reset_index(name='Count')
-                pivot_df = grouped_df.pivot(index='date', columns='Source', values='Count')
 
-                pattern = "|".join(filtered_df["ArticleID"])
-                headlines = ref[ref["ArticleID"].str.contains(pattern)]
+                # pivot_df = grouped_df.pivot(index='date', columns='Source', values='Count')
 
-                st.write("This is a list of all headlines in which the paragraphs above appear.")   
+                pattern = filtered_df["ArticleID"].unique()
+                headlines = ref[ref["ArticleID"].isin(pattern)]
+
+                st.write("This is a list of all headlines in which the paragraphs above appear. Use the ArticleID to match lines to articles after you export the data.")   
                 st.dataframe(headlines)
                 
-                st.markdown("---")  # This creates a horizontal line
+                st.markdown("---")  
                 st.write("This is a timeseries chart showing the presence of relevant paragraphs over time.")   
-                st.bar_chart(pivot_df)
+                # st.line_chart(pivot_df)
 
 
+                fig3 = px.line(grouped_df, x='date', y='Count',color="Source", title='Sample Line Chart')
+
+                # Display the chart in Streamlit
+                
+                fig3.update_layout(
+                    width=800, 
+                )
+
+                st.plotly_chart(fig3)
+
+
+
+
+
+
+with st.expander("Methodology"):
+    st.write("""
+        TEXT TEXT
+    """)
 
 
 #----------------------------------
@@ -282,3 +342,6 @@ with tabs[1]:
                 )
 
                 st.plotly_chart(fig2)
+
+
+
