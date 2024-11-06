@@ -62,9 +62,9 @@ def highlight_search_term(text, term):
 
 with tabs[0]:
 
-    st.markdown("This tool allows you to search for text in articles from date X to date Y, using a variety of sources. Most article texts are included, but opinion pieces, editorials, and interactive content (such as maps and videos) are not. Live articles are accessible, providing up-to-date information.")
+    st.markdown("This tool allows you to search for text in articles from NYTimes, CNN, AP News, Washington Post, and USA Today from October 7, 2023 to July 31, 2024. Most article text is included, but opinion pieces, editorials, and interactive content (such as maps and videos) are not. Text from live articles is accessible, however. Currently, there are ~14,000 articles with extracted bodies and ~20,000 articles with headlines available for headline analysis.")
     
-    st.markdown("Currently, there are X articles with extracted bodies and Y articles with only headlines available. You can search for terms or phrases that appear in the same paragraph. While you can export an unlimited number of paragraphs from your search results, you cannot read or export entire articles. To access full articles, follow the links provided next to the paragraphs of interest.")
+    st.markdown("While you can export an unlimited number of paragraphs from your search results, you cannot read or export entire articles. To access full articles, follow the links provided next to the paragraphs of interest.")
     
     st.markdown('To search, use the form below. For terms appearing together in the same paragraph, enter each word in its own box (e.g., "cat" AND "dog"). To find paragraphs containing either term, use the "|" symbol between each word or phrase. Note that searching for "cat" will also return variations like "cats," "catelogue," and "caterpillar," so please be specific in your queries. ')
    
@@ -247,8 +247,9 @@ with st.expander("Methodology"):
 
 with tabs[1]:
 
-    st.markdown("For AND statements, use the different boxes. For OR statements, use a '|' between terms. ")
-
+    st.markdown("This tool allows you to search for text in headlines from NYTimes, CNN, AP News, Washington Post, and USA Today from October 7, 2023 to July 31, 2024.") 
+                
+    st.markdown('To search, use the form below. For terms appearing together in the same headline, enter each word in its own box (e.g., "cat" AND "dog"). To find headlines containing either term, use the "|" symbol between each word or phrase. Note that searching for "cat" will also return variations like "cats," "catelogue," and "caterpillar," so please be specific in your queries. ')
     
     with st.form(key='my_form2'):
         
